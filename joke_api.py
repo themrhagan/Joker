@@ -15,6 +15,16 @@ def search_jokes(term, page=1, limit=20):
         "page": page,
         "limit": limit
     }
-    response = requests.get(url, headers=HEADERS, params=params)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(url, headers=HEADERS, params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.Timeout:
+        print("Request timed out. Please try again later.")
+        return None
+    except requests.exceptions.TooManyRedirects:
+        print("Too many redirects. Check the URL.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching jokes: {e}")
+        return None
