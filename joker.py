@@ -1,8 +1,7 @@
-# joker.py
 import argparse
 import time
 import random
-from joke_api import search_jokes
+from joke_api import search_jokes, get_random_joke
 from ascii_arts import ascii_arts
 
 def fetch_unique_jokes(search_term, num_jokes_per_set, randomize, seen_joke_ids):
@@ -10,7 +9,7 @@ def fetch_unique_jokes(search_term, num_jokes_per_set, randomize, seen_joke_ids)
     Fetch the required number of jokes, ensuring they are unique.
     
     Args:
-        search_term (str): The search term to look for jokes.
+        search_term (str): The search term to look for jokes. If None, fetch random jokes.
         num_jokes_per_set (int): The number of jokes per set to fetch.
         randomize (bool): Whether to randomize the order of jokes.
         seen_joke_ids (set): Set of already seen joke IDs to ensure uniqueness.
@@ -21,27 +20,38 @@ def fetch_unique_jokes(search_term, num_jokes_per_set, randomize, seen_joke_ids)
     jokes_list = []
     current_page = 1
 
-    while len(jokes_list) < num_jokes_per_set:
-        jokes_data = search_jokes(term=search_term, page=current_page, limit=30)
-        if jokes_data is None:
-            break
+    if search_term:
+        while len(jokes_list) < num_jokes_per_set:
+            jokes_data = search_jokes(term=search_term, page=current_page, limit=30)
+            if jokes_data is None:
+                break
 
-        page_jokes = jokes_data.get('results', [])
-        
-        # Filter out already printed jokes
-        page_jokes = [joke for joke in page_jokes if joke['id'] not in seen_joke_ids]
+            page_jokes = jokes_data.get('results', [])
+            
+            # Filter out already printed jokes
+            page_jokes = [joke for joke in page_jokes if joke['id'] not in seen_joke_ids]
 
-        # If randomize is true, shuffle the jokes
-        if randomize:
-            random.shuffle(page_jokes)
+            # If randomize is true, shuffle the jokes
+            if randomize:
+                random.shuffle(page_jokes)
 
-        # Add the jokes to the list until we have enough
-        jokes_list.extend(page_jokes)
-        current_page += 1
+            # Add the jokes to the list until we have enough
+            jokes_list.extend(page_jokes)
+            current_page += 1
 
-        # Break if no more jokes are available
-        if not page_jokes:
-            break
+            # Break if no more jokes are available
+            if not page_jokes:
+                break
+    else:
+        while len(jokes_list) < num_jokes_per_set:
+            joke_data = get_random_joke()
+            if joke_data is None:
+                break
+            joke = joke_data.get('joke')
+            joke_id = joke_data.get('id')
+            if joke_id not in seen_joke_ids:
+                jokes_list.append({'joke': joke, 'id': joke_id})
+                seen_joke_ids.add(joke_id)
 
     return jokes_list[:num_jokes_per_set]
 
@@ -76,7 +86,7 @@ def main():
     )
 
     # Add arguments
-    parser.add_argument('-s', '--search_term', type=str, required=True, help="The search term to look for jokes")
+    parser.add_argument('-s', '--search_term', type=str, help="The search term to look for jokes (optional)")
     parser.add_argument('-n', '--num_jokes', type=int, required=True, help="The number of jokes per set to fetch")
     parser.add_argument('-d', '--duration', type=int, default=1, help="The duration in minutes the application should fetch sets of jokes (default: 1 minute)")
     parser.add_argument('-i', '--interval', type=int, default=15, help="The interval in seconds between fetching new sets of jokes (default: 15 seconds)")
