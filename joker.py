@@ -3,9 +3,21 @@ import argparse
 import time
 import random
 from joke_api import search_jokes
+from ascii_arts import ascii_arts
 
 def fetch_unique_jokes(search_term, num_jokes_per_set, randomize, seen_joke_ids):
-    """Fetch the required number of jokes, ensuring they are unique."""
+    """
+    Fetch the required number of jokes, ensuring they are unique.
+    
+    Args:
+        search_term (str): The search term to look for jokes.
+        num_jokes_per_set (int): The number of jokes per set to fetch.
+        randomize (bool): Whether to randomize the order of jokes.
+        seen_joke_ids (set): Set of already seen joke IDs to ensure uniqueness.
+    
+    Returns:
+        list: A list of unique jokes.
+    """
     jokes_list = []
     current_page = 1
 
@@ -32,6 +44,29 @@ def fetch_unique_jokes(search_term, num_jokes_per_set, randomize, seen_joke_ids)
             break
 
     return jokes_list[:num_jokes_per_set]
+
+def print_ascii_art():
+    """
+    Print a randomly selected ASCII art of the word 'Joker'.
+    """
+    ascii_art = random.choice(ascii_arts)
+    max_width = max(len(line) for line in ascii_art.split('\n'))
+
+    print("+" + "-" * (max_width + 2) + "+")
+    for line in ascii_art.split('\n'):
+        print("| " + line.ljust(max_width) + " |")
+    print("+" + "-" * (max_width + 2) + "+")
+    print("...")
+
+def print_joke(joke):
+    """
+    Print a joke.
+    
+    Args:
+        joke (str): The joke to print.
+    """
+    print(joke)
+    print("...")
 
 def main():
     # Create the parser
@@ -67,12 +102,6 @@ def main():
     interval_seconds = args.interval  # Interval in seconds
     randomize_order = args.random
 
-    print(f"Search term: {search_term}")
-    print(f"Number of jokes per set: {num_jokes_per_set}")
-    print(f"Duration (minutes): {duration_minutes}")
-    print(f"Interval (seconds): {interval_seconds}")
-    print(f"Random order: {randomize_order}")
-
     # Convert duration to seconds
     total_duration_seconds = duration_minutes * 60
     start_time = time.time()
@@ -80,8 +109,10 @@ def main():
 
     seen_joke_ids = set()
 
+    # Print ASCII art at the beginning of the run
+    print_ascii_art()
+
     while time.time() < end_time:
-        print(f"Fetching {num_jokes_per_set} jokes for search term '{search_term}'...")
         jokes_to_print = fetch_unique_jokes(search_term, num_jokes_per_set, randomize_order, seen_joke_ids)
 
         if not jokes_to_print:
@@ -92,7 +123,7 @@ def main():
         joke_interval_seconds = interval_seconds / max(1, num_jokes_per_set)
 
         for joke in jokes_to_print:
-            print(joke['joke'])
+            print_joke(joke['joke'])
             seen_joke_ids.add(joke['id'])
             time.sleep(joke_interval_seconds)  # Print each joke evenly within the interval
 
