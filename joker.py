@@ -1,5 +1,7 @@
+# joker.py
 import argparse
 import time
+from joke_api import search_jokes
 
 def main():
     # Create the parser
@@ -35,8 +37,16 @@ def main():
 
     while time.time() < end_time:
         print(f"Fetching {num_jokes} jokes for search term '{search_term}'...")
-        # Code to fetch jokes from API would go here
-        time.sleep(interval)  # Wait the specified interval before fetching the next set
+        # Fetch jokes from API
+        jokes_data = search_jokes(term=search_term, limit=num_jokes)
+        jokes = jokes_data.get('results', [])
+
+        for joke in jokes:
+            print(joke['joke'])
+            time.sleep(1)  # Print each joke individually with a small delay
+
+        # Wait the specified interval before fetching the next set
+        time.sleep(interval)
 
 if __name__ == "__main__":
     main()
