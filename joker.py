@@ -41,12 +41,17 @@ def main():
         jokes_data = search_jokes(term=search_term, limit=num_jokes)
         jokes = jokes_data.get('results', [])
 
+        # Calculate the delay between each joke within the interval
+        joke_interval = interval / max(1, num_jokes)
+
         for joke in jokes:
             print(joke['joke'])
-            time.sleep(1)  # Print each joke individually with a small delay
+            time.sleep(joke_interval)  # Print each joke evenly within the interval
 
-        # Wait the specified interval before fetching the next set
-        time.sleep(interval)
+        # Wait the remainder of the interval before fetching the next set
+        remaining_time = interval - (joke_interval * num_jokes)
+        if remaining_time > 0:
+            time.sleep(remaining_time)
 
 if __name__ == "__main__":
     main()
