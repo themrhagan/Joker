@@ -31,7 +31,7 @@ python Joker.py -s <search_term> -n <num_jokes> -d <duration> -i <interval> [-r]
 
 ## Arguments
 
-- -s, --search_term (required): The search term to look for jokes.
+- -s, --search_term (optional): The search term to look for jokes.
 - -n, --num_jokes (required): The number of jokes per set to fetch.
 - -d, --duration (optional, default=1): The duration in minutes the application should fetch sets of jokes (default: 1 minute).
 - -i, --interval (optional, default=15): The interval in seconds between fetching new sets of jokes (default: 15 seconds).
